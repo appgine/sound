@@ -240,7 +240,7 @@ function changeSound(thisTrack, fadeIn) {
 
 export function destroy(seconds=0) {
 	internalDestroy(seconds);
-	notify();
+	setTimeout(notify, 0);
 }
 
 function internalDestroy(seconds=0) {
