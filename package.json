@@ -11,6 +11,13 @@
     "type": "git",
     "url": "git+https://github.com/appgine/sound.git"
   },
+  "files": [
+    "lib",
+    "adapter",
+    "plugins",
+    "sound.js",
+    "store.js"
+  ],
   "scripts": {},
   "bugs": {
     "url": "https://github.com/appgine/sound/issues"
