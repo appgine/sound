@@ -73,10 +73,7 @@ export default function create(enabled, state, bridge) {
 
 	function stopPlayer() {
 		SoundStore.destroy(2);
-		destroyPlayer();
-	}
-
-	function destroyPlayer() {
+		playerState = SoundStore.initialMonitor();
 		clearInterval(updateinterval);
 		updateinterval = null;
 		currentTrack = null;
@@ -472,9 +469,8 @@ export default function create(enabled, state, bridge) {
 
 				if (!nextTrack) {
 					logFailed('error');
-					SoundStore.destroy();
 					errorhub.dispatch(0, 'playerState.error', new Error('playerState.error'), currentTrack.url);
-					return destroyPlayer();
+					return stopPlayer();
 				}
 
 			} else if (nextSoundAction===null && playerState.playing && playerState.duration-computedPlayerState.position<Math.max(0, settings.fadeTime, settings.sampleTime)+6) {
