@@ -129,6 +129,10 @@ export function preload(url, labels, label, userAction) {
 	const track = {
 		destroy() {
 			if (currentTrack===null || thisSound!==currentTrack.sound) {
+				if (nextTrack===thisTrack) {
+					nextTrack = null;
+				}
+
 				thisSound.destroy();
 				setTimeout(notify, 0);
 			}
