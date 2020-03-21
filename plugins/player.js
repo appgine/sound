@@ -201,7 +201,7 @@ export default function create(enabled, state, bridge) {
 			updateinterval = setInterval(update, 250);
 		}
 
-		if (currentState.label && nextTrack && nextTrack.label===currentState.label) {
+		if (currentState.label && nextSound===null && nextTrack && nextTrack.label===currentState.label) {
 			setCurrentTrack(nextTrack);
 		}
 
@@ -278,7 +278,7 @@ export default function create(enabled, state, bridge) {
 						const nextTrackLabel = (nextTrack || nextSound || nextSoundAction || {}).label;
 						nextTrack = nextTrackLabel && findCurrentTrack(state.playlist, nextTrackLabel) || nextTrack || null;
 
-						if (nextTrack && playerState.label && nextTrack.label===playerState.label) {
+						if (nextTrack && nextSound===null && playerState.label && nextTrack.label===playerState.label) {
 							setCurrentTrack(nextTrack);
 
 						} else if (nextTrack===null && (nextSound || nextSoundAction)) {
