@@ -63,10 +63,7 @@ export default function create(enabled, state, bridge) {
 		}
 
 		currentTrack = thisTrack;
-		nextTrack = null;
-		nextSound && nextSound.destroy();
-		nextSound = null;
-		nextSoundAction = null;
+		destroyNextSound();
 		setPlaylistBought(state.playlist.bought && thisTrack.data.bought>0);
 		bridge.changeCurrentTrack(currentTrack);
 	}
