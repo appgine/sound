@@ -544,6 +544,32 @@ export default function create(enabled, state, bridge) {
 			setPlaylistBought(toggled);
 			render();
 		},
+		updateSource() {
+			const id = state.playlist.id;
+
+			if (state.playlist.loading===false && id) {
+				state.playlist.id = null;
+				loadSource(id, state.labels, state.playlist.bought, function() {
+					const tracks = [
+						currentTrack && [currentTrack.track, currentTrack.index],
+						currentTrack && [currentTrack.track, 0],
+						[0, 0],
+					].filter(_ => _);
+
+					for (let [track, index] of tracks) {
+						const thisTrack = formatPlaylistTrack(state.playlist, track, index)
+
+						if (thisTrack) {
+							if (currentTrack===null || currentTrack.label!==thisTrack.label) {
+								loadTrack(track, index);
+							}
+
+							break;
+						}
+					}
+				});
+			}
+		},
 		changeVolume: SoundStore.changeVolume,
 		changeFadeTime: fadeTime => settings.fadeTime = SoundStore.isFadeSupported() ? fadeTime : false,
 		changeSampleTime: sampleTime => settings.sampleTime = SoundStore.isFadeSupported() ? sampleTime : false,
