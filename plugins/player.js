@@ -125,7 +125,7 @@ export default function create(enabled, state, bridge) {
 	let nextSound = null;
 	let nextSoundAction = null;
 
-	this.listen('play', function($element, url, labels, label) {
+	function onPlayEvent($element, url, labels, label) {
 		destroyNextSound();
 
 		let nextLabels = [];
@@ -156,6 +156,16 @@ export default function create(enabled, state, bridge) {
 
 		} else if (nextSoundAction || nextTrack) {
 			render(true);
+		}
+	}
+
+	this.listen('play', onPlayEvent);
+	this.listen('autoplay', function($element, url, labels, label) {
+		if (nextTrack && nextTrack.label===label) {
+			nextSoundAction = nextSound;
+
+		} else if (currentTrack===null || currentTrack.label!==label) {
+			onPlayEvent($element, url, labels, label);
 		}
 	});
 

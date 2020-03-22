@@ -6,8 +6,9 @@ const autoplayed = {};
 
 
 export default function create($element, data) {
-	const play = this.dispatch.bind(this, 'play');
-	const log = this.dispatch.bind(this, 'tracksample');
+	const dispatchAutoplay = this.dispatch.bind(this, 'autoplay');
+	const dispatchPlay = this.dispatch.bind(this, 'play');
+	const dispatchLog = this.dispatch.bind(this, 'tracksample');
 
 	let autoplay = data.autoplay && autoplayed[data.autoplay]===undefined ? 1 : 0;
 
@@ -17,8 +18,8 @@ export default function create($element, data) {
 		targets.first('sample', function($element, { data }) {
 			if (autoplay===1) {
 				autoplay = 2;
-				log(data.label, 'autoplay');
-				play($element, data.url, data.labels, data.label);
+				dispatchLog(data.label, 'autoplay');
+				dispatchAutoplay($element, data.url, data.labels, data.label);
 			}
 		});
 
@@ -31,8 +32,8 @@ export default function create($element, data) {
 				onClick() {
 					if ($pointer===null) {
 						autoplay = 0;
-						log(data.label, 'play');
-						play($sample, data.url, data.labels, data.label);
+						dispatchLog(data.label, 'play');
+						dispatchPlay($sample, data.url, data.labels, data.label);
 						return true;
 					}
 				},
@@ -45,7 +46,7 @@ export default function create($element, data) {
 					if ($pointer) {
 						clearInterval(renderinterval);
 						renderinterval = null;
-						log(data.label, 'seek', percent);
+						dispatchLog(data.label, 'seek', percent);
 						state.control.seek((percent<0.05 ? 0 : percent));
 					}
 				},
