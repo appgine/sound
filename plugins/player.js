@@ -533,7 +533,7 @@ export default function create(enabled, state, bridge) {
 			updateinterval = null;
 			playerState.control.seek(percent);
 		},
-		setAutoPlay: () => state.autoPlayTrack = true,
+		setAutoPlay: (autoPlayTrack=true) => state.autoPlayTrack = !!autoPlayTrack,
 		onTrack: index => loadTrack(index, 0),
 		onTrackIndex: index => currentTrack && loadTrack(currentTrack.track, index),
 		stopPlayer,
