@@ -524,7 +524,7 @@ export default function create(enabled, state, bridge) {
 		return { position, positionTrack, positionWidth, bufferedWidth }
 	}
 
-	render();
+	setTimeout(render, 0);
 
 	const playerApi = {
 		getCurrentLabel: () => currentTrack && currentTrack.label,
@@ -584,6 +584,7 @@ export default function create(enabled, state, bridge) {
 		changeFadeTime: fadeTime => settings.fadeTime = SoundStore.isFadeSupported() ? fadeTime : false,
 		changeSampleTime: sampleTime => settings.sampleTime = SoundStore.isFadeSupported() ? sampleTime : false,
 		destroy() {
+			enabled = false;
 			monitor();
 			clearInterval(updateinterval);
 		}
