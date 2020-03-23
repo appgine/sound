@@ -320,7 +320,7 @@ export default function create(enabled, state, bridge) {
 	}
 
 	function playNextSound(sound, pending) {
-		const { position } = computePlayerState();
+		const { position, duration } = computePlayerState();
 
 		let endOffset = 0;
 		let fn = sound.play.bind(null, Math.max(0, settings.sampleTime), nextTrack && nextTrack.samplestart && Math.max(0, settings.sampleTime) || 0);
@@ -352,12 +352,12 @@ export default function create(enabled, state, bridge) {
 			endOffset = settings.fadeTime;
 			fn = sound.fade.bind(null, settings.fadeTime);
 
-		} else if (settings.sampleTime>0 && (currentTrack.sampleend || position<playerState.duration)) {
+		} else if (settings.sampleTime>0 && (currentTrack.sampleend || position<duration)) {
 			endOffset = settings.sampleTime;
 			fn = sound.play.bind(null, settings.sampleTime, nextTrack.samplestart && settings.sampleTime || 0);
 		}
 
-		if (pending || playerState.duration-position <= endOffset) {
+		if (pending || duration-position <= endOffset) {
 			return fn;
 		}
 
@@ -491,10 +491,11 @@ export default function create(enabled, state, bridge) {
 	}
 
 	function computePlayerState(percent=null) {
-		let position = playerState.position + (playerState.playing ? (Date.now()-playerState.starttime)/1000 : 0.0);
+		let duration = parseInt(playerState.duration, 10);
+		let position = Math.min(duration, playerState.position + (playerState.playing ? (Date.now()-playerState.starttime)/1000 : 0.0));
 
 		if (currentTrack && currentTrack.ended) {
-			position = currentTrack.ended;
+			position = playerState.duration;
 
 		} else if (state.seeking) {
 			position = playerState.duration*state.seeking;
@@ -521,7 +522,7 @@ export default function create(enabled, state, bridge) {
 			bufferedWidth = String(left+width)+'%';
 		}
 
-		return { position, positionTrack, positionWidth, bufferedWidth }
+		return { duration, position, positionTrack, positionWidth, bufferedWidth }
 	}
 
 	setTimeout(render, 0);
