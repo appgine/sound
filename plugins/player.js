@@ -27,6 +27,7 @@ export default function create(enabled, state, bridge) {
 		autoPlaySource: false,
 		autoPlayTrack: false,
 		seeking: false,
+		ending: false,
 		labels: [],
 		playlist: {
 			id: null,
@@ -217,6 +218,7 @@ export default function create(enabled, state, bridge) {
 
 		const shouldUpdate = playerState.playing && currentState.ended;
 		playerState = currentState;
+		state.ending = false;
 		shouldUpdate && update();
 		shouldUpdate ? setTimeout(render, 0) : render();
 	});
@@ -484,6 +486,11 @@ export default function create(enabled, state, bridge) {
 				nextTrack = currentTrack && findNextSound(state.playlist, currentTrack, enabled);
 				nextSound = nextTrack && SoundStore.preload(nextTrack.url, nextTrack.labels, nextTrack.label, false);
 				nextSoundAction = null;
+
+				if (state.ending===false && nextTrack===null && currentTrack && currentTrack.sampleend && settings.sampleTime>0 && playerState.duration-computedPlayerState.position<settings.sampleTime) {
+					state.ending = true;
+					playerState.control.fadeOut(settings.sampleTime);
+				}
 		 	}
 		}
 
