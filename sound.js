@@ -166,7 +166,11 @@ export function createSound(endpoint) {
 	}
 
 	function pauseState(ended=false, fn=notify) {
-		if (playing>0) {
+		if (audio.currentTime>=duration) {
+			playing = -1;
+			fn();
+
+		} else if (playing>0) {
 			playing = ended ? null : 0;
 			buffering = false;
 			audio.pause();
