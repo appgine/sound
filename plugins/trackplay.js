@@ -70,7 +70,7 @@ export default function create($element, { url, label, sample }) {
 				}
 			});
 
-			color = color || (state.playing || state.paused ? window.getComputedStyle($element).color : null) || null;
+			color = color || ($canvas ? window.getComputedStyle($canvas).color : null);
 
 			if ($canvas && created+progressDuration>Date.now()) {
 				function renderCanvasProgress() {
