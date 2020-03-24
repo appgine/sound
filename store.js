@@ -8,7 +8,7 @@ const connectorUrl = createConnector(notify, 0);
 connectorUrl.setDefaultDirty(false);
 
 const initialState = {...defaultState(), label: null, nextTrack: false, loading: false, isCurrent: false, initial: true}
-const initialControl = {play() {}, pause() {}, toggle() {}, seek() {}};
+const initialControl = {play() {}, pause() {}, toggle() {}, seek() {}, fadeOut() {}};
 
 const fadeOutSounds = [];
 let fadeOutSignal = false;
@@ -118,6 +118,9 @@ export function preload(url, labels, label, userAction) {
 						thisTrack.dirty = true;
 						thisTrack.sound.seek(percent);
 					}
+				},
+				fadeOut(seconds) {
+					thisTrack.sound.fadeOut(seconds);
 				}
 			}
 		};
