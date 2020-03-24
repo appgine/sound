@@ -262,6 +262,7 @@ export function createSound(endpoint) {
 		},
 		setVolume: changeVolume,
 		seek(percent) {
+			fadePlayer(true, true, percent>0 ? 1 : 0);
 			buffering = true;
 			seeking = percent;
 
