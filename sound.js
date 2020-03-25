@@ -228,6 +228,9 @@ export function createSound(endpoint) {
 
 		} else if (source instanceof AudioBufferSourceNode) {
 			source.connect(volumeNode);
+
+		} else if (source instanceof GainNode) {
+			source.connect(volumeNode);
 		}
 	});
 
