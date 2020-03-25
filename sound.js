@@ -31,7 +31,7 @@ export function initSound() {
 	}
 
 	if (audioAdapterFactory===undefined) {
-		if (isSafari && audioCtx) {
+		if (isSafari && audioCtx && window.fetch) {
 			audioAdapterFactory = require('./adapter/frames').default;
 
 		} else {
