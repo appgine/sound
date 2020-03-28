@@ -36,7 +36,7 @@ export function connect(label) {
 
 export function initialMonitor() {
 	if (currentTrack) {
-		return {...currentTrack.state, label: currentTrack.label, dirty: currentTrack.dirty, control: currentTrack.control, nextTrack: !!nextTrack, loading: !!(currentTrack.state.buffering || fadeOutSignal || fadeInAction), ...currentTrack};
+		return {...currentTrack, ...currentTrack.state, label: currentTrack.label, dirty: currentTrack.dirty, control: currentTrack.control, nextTrack: !!nextTrack, loading: !!(currentTrack.state.buffering || fadeOutSignal || fadeInAction)};
 	}
 
 	return {...initialState, dirty: false, control: initialControl, nextTrack: !!nextTrack};
