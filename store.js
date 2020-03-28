@@ -1,4 +1,5 @@
 
+import * as timer from 'appgine/lib/lib/timer'
 import { createConnector } from 'appgine/lib/helpers/createConnector'
 import { defaultState, initSound, createSound } from './sound'
 export { isFadeSupported } from './sound'
@@ -84,7 +85,7 @@ export function preload(url, labels, label, userAction) {
 					}
 				},
 				pause() {
-					clearTimeout(fadeInTimeout);
+					timer.clearTimeout(fadeInTimeout);
 					fadeInAction && fadeInAction(false);
 					destroyFadeOut();
 
@@ -127,7 +128,7 @@ export function preload(url, labels, label, userAction) {
 	}
 
 	nextTrack = userAction ? createTrack() : null;
-	setTimeout(notify, 0);
+	timer.setTimeout(notify, 0);
 
 	const track = {
 		destroy() {
@@ -137,7 +138,7 @@ export function preload(url, labels, label, userAction) {
 				}
 
 				thisSound.destroy();
-				setTimeout(notify, 0);
+				timer.setTimeout(notify, 0);
 			}
 		},
 		isReady() {
@@ -160,12 +161,12 @@ export function preload(url, labels, label, userAction) {
 				changeSound(createTrack(), autoplay ? fadeIn : false);
 			}
 
-			clearTimeout(fadeInTimeout);
+			timer.clearTimeout(fadeInTimeout);
 
 			if (fadeOut>0) {
 				currentTrack.sound.fadeOutQuick(fadeOut);
 				nextTrack = createTrack();
-				fadeInTimeout = setTimeout(() => fadeInAction && fadeInAction(true), fadeOut*1000);
+				fadeInTimeout = timer.setTimeout(() => fadeInAction && fadeInAction(true), fadeOut*1000);
 				notify();
 
 			} else {
@@ -173,7 +174,7 @@ export function preload(url, labels, label, userAction) {
 			}
 		},
 		fade(seconds) {
-			clearTimeout(fadeInTimeout);
+			timer.clearTimeout(fadeInTimeout);
 			fadeInAction = null;
 
 			if (currentTrack) {
@@ -182,7 +183,7 @@ export function preload(url, labels, label, userAction) {
 				fadeOutSounds.push(fadeOutSound);
 				fadeOutSound.fadeOut(seconds);
 
-				setTimeout(function() {
+				timer.setTimeout(function() {
 					if (fadeOutSounds.indexOf(fadeOutSound)!==-1) {
 						fadeOutSounds.splice(fadeOutSounds.indexOf(fadeOutSound), 1);
 						fadeOutSignal = fadeOutSounds.legnth ? fadeOutSignal : false;
@@ -192,7 +193,7 @@ export function preload(url, labels, label, userAction) {
 				}, seconds*1000);
 
 				if (seconds>2) {
-					setTimeout(function() {
+					timer.setTimeout(function() {
 						if (fadeOutSignal && fadeOutSounds.indexOf(fadeOutSound)===fadeOutSounds.length-1) {
 							fadeOutSignal = false;
 							notify();
@@ -247,11 +248,11 @@ function changeSound(thisTrack, fadeIn) {
 
 export function destroy(seconds=0) {
 	internalDestroy(seconds);
-	setTimeout(notify, 0);
+	timer.setTimeout(notify, 0);
 }
 
 function internalDestroy(seconds=0) {
-	clearTimeout(fadeInTimeout);
+	timer.clearTimeout(fadeInTimeout);
 	fadeInAction = null;
 	destroyFadeOut();
 	currentTrack && currentTrack.sound.fadeOut(seconds);

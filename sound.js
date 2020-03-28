@@ -1,4 +1,5 @@
 
+import * as timer from 'appgine/lib/lib/timer'
 import createFadeArray from './lib/createFadeArray'
 import createVolumeNode from './lib/createVolumeNode'
 
@@ -151,13 +152,13 @@ export function createSound(endpoint) {
 
 	let notifytimeout = null;
 	function notify() {
-		clearTimeout(notifytimeout);
+		timer.clearTimeout(notifytimeout);
 		listeners.state.filter(_ => true).forEach(fn => fn(createState()));
 	}
 
 	function notifyNext() {
-		clearTimeout(notifytimeout);
-		notifytimeout = setTimeout(notify, 100);
+		timer.clearTimeout(notifytimeout);
+		notifytimeout = timer.setTimeout(notify, 100);
 	}
 
 	function changeVolume(volume) {
@@ -211,7 +212,7 @@ export function createSound(endpoint) {
 			}
 
 		} else if (playing>0 && fadeNode) {
-			setTimeout(() => newFadeNode===fadeNode && pauseState(), seconds*1000);
+			timer.setTimeout(() => newFadeNode===fadeNode && pauseState(), seconds*1000);
 
 		} else if (playing>0) {
 			pauseState();

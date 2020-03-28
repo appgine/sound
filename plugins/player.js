@@ -1,5 +1,6 @@
 
 import { uri } from 'appgine/lib/closure'
+import * as timer from 'appgine/lib/lib/timer'
 import * as errorhub from 'appgine/errorhub'
 import * as SoundStore from '../store'
 import domDistance, { domDistanceCompare } from '../lib/dom-distance'
@@ -72,7 +73,7 @@ export default function create(enabled, state, bridge) {
 	function stopPlayer() {
 		SoundStore.destroy(2);
 		playerState = SoundStore.initialMonitor();
-		clearInterval(updateinterval);
+		timer.clearInterval(updateinterval);
 		updateinterval = null;
 		currentTrack = null;
 		destroyNextSound();
@@ -209,7 +210,7 @@ export default function create(enabled, state, bridge) {
 
 	monitor.then(function(currentState) {
 		if (updateinterval===null && (state.visible || nextSound || nextSoundAction)) {
-			updateinterval = setInterval(update, 250);
+			updateinterval = timer.setInterval(update, 250);
 		}
 
 		if (currentState.label && nextSound===null && nextTrack && nextTrack.label===currentState.label) {
@@ -220,7 +221,7 @@ export default function create(enabled, state, bridge) {
 		playerState = currentState;
 		state.ending = false;
 		shouldUpdate && update();
-		shouldUpdate ? setTimeout(render, 0) : render();
+		shouldUpdate ? timer.setTimeout(render, 0) : render();
 	});
 
 	function toggleSource(source, label, playBought, play=false) {
@@ -252,7 +253,7 @@ export default function create(enabled, state, bridge) {
 
 			render(true);
 
-			setTimeout(function() {
+			timer.setTimeout(function() {
 				logSource(source, 'load');
 				ajax(source, function(status, response) {
 					if (state.playlist.id===source) {
@@ -532,7 +533,7 @@ export default function create(enabled, state, bridge) {
 		return { duration, position, positionTrack, positionWidth, bufferedWidth }
 	}
 
-	setTimeout(render, 0);
+	timer.setTimeout(render, 0);
 
 	const playerApi = {
 		getCurrentLabel: () => currentTrack && currentTrack.label,
@@ -547,7 +548,7 @@ export default function create(enabled, state, bridge) {
 			nextTrack && loadTrack(nextTrack.track, nextTrack.index);
 		},
 		seek(percent) {
-			clearInterval(updateinterval);
+			timer.clearInterval(updateinterval);
 			updateinterval = null;
 			playerState.control.seek(percent);
 		},
@@ -594,7 +595,7 @@ export default function create(enabled, state, bridge) {
 		destroy() {
 			enabled = false;
 			monitor();
-			clearInterval(updateinterval);
+			timer.clearInterval(updateinterval);
 		}
 	}
 
