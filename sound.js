@@ -1,11 +1,8 @@
 
+import { isSafari } from './lib/browser'
 import * as timer from 'appgine/lib/lib/timer'
 import createFadeArray from './lib/createFadeArray'
 import createVolumeNode from './lib/createVolumeNode'
-
-const isSafari = /constructor/i.test(window.HTMLElement)
-	|| (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification))
-	|| (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream);
 
 
 export function defaultState() {
@@ -32,7 +29,7 @@ export function initSound() {
 	}
 
 	if (audioAdapterFactory===undefined) {
-		if (isSafari && audioCtx && window.fetch) {
+		if (isSafari() && audioCtx && window.fetch) {
 			audioAdapterFactory = require('./adapter/frames').default;
 
 		} else {
