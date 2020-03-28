@@ -12,6 +12,7 @@ export default function create(enabled, state, bridge) {
 
 	let playerState = SoundStore.initialMonitor();
 
+	const dispatchTrack = this.dispatch.bind(this, 'player-track');
 	const logFailed = this.dispatch.bind(this, 'player-failed');
 	const logSource = this.dispatch.bind(this, 'player-source');
 
@@ -67,6 +68,7 @@ export default function create(enabled, state, bridge) {
 		currentTrack = thisTrack;
 		destroyNextSound();
 		setPlaylistBought(state.playlist.bought && thisTrack.data.bought>0);
+		dispatchTrack(currentTrack);
 		bridge.changeCurrentTrack(currentTrack);
 	}
 
@@ -170,6 +172,11 @@ export default function create(enabled, state, bridge) {
 			onPlayEvent($element, url, labels, label);
 		}
 	});
+
+	this.listen('player', 'prev', () => playerApi.prev());
+	this.listen('player', 'next', () => playerApi.next());
+	this.listen('player', 'seekbackward', () => playerState.playing && playerApi.seek(Math.max(0.0, (computePlayerState().position-Math.min(15, playerState.duration*0.1))/playerState.duration)));
+	this.listen('player', 'seekforward', () => playerState.playing && playerApi.seek(Math.min(1.0, (computePlayerState().position+Math.min(15, playerState.duration*0.1))/playerState.duration)));
 
 	targets.complete(updateActivePlaylist);
 
