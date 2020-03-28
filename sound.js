@@ -16,6 +16,12 @@ export function defaultState() {
 }
 
 
+let _initList = [];
+export function onInit(fn) {
+	_initList.push(fn);
+}
+
+
 let audioCtx;
 let audioAdapterFactory;
 let audioFactory;
@@ -26,6 +32,11 @@ export function initSound() {
 		if (window.AudioContext || window.webkitAudioContext) {
 			audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 		}
+
+		_initList.forEach(fn => fn(audioCtx, true));
+
+	} else {
+		_initList.forEach(fn => fn(audioCtx, false));
 	}
 
 	if (audioAdapterFactory===undefined) {
