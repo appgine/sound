@@ -460,11 +460,10 @@ export default function create(enabled, state, bridge) {
 					nextSoundAction = nextSound;
 					nextSound = null;
 					state.seeking = false;
-
-					setTimeout(function() {
-						thisNextFn();
-						isUserAction && bridge.userAction();
-					}, 0);
+					bridge.update(computedPlayerState);
+					thisNextFn();
+					isUserAction && bridge.userAction();
+					return true;
 
 				} else if (nextSound.isFailed()) {
 					logFailed('sound', nextSound.label);
