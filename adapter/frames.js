@@ -270,6 +270,10 @@ export default function create(context) {
 			}
 		}
 
+		Object.defineProperty(control, 'buffered', {
+			get() { return audioDuration; },
+		});
+
 		Object.defineProperty(control, 'currentTime', {
 			get() { return Math.min(endTime, context.currentTime)-startTime },
 			set(currentTime) {
