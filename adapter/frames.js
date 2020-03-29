@@ -98,7 +98,7 @@ export default function create(context) {
 
 		let decoding = 0;
 		function decodeBuffer() {
-			if (playing<=0) {
+			if (playing<=0 && seeking===false) {
 				return false;
 
 			} else if (decoding>0 || nextSource!==null) {
@@ -114,6 +114,10 @@ export default function create(context) {
 					buffering = true;
 					audioBridge.waiting();
 				}
+
+			} else if (playing<=0) {
+				seeking = false;
+				audioBridge.seeked();
 
 			} else if (parsed && frames.length<=offsetFrame) {
 				if (currentSource===null) {
