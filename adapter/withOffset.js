@@ -71,6 +71,7 @@ export default function withOffset(audioFactory)
 				destroy() {
 					handler && handler.destroy();
 					handler = null;
+					audio = null;
 				},
 				pause() {
 					if (paused===false) {
@@ -108,6 +109,7 @@ export default function withOffset(audioFactory)
 
 					if (shouldCreateAudio) {
 						handler && handler.destroy();
+						audio = null;
 						seeking = true;
 						config.seeking();
 						config.waiting();
