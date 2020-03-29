@@ -155,7 +155,7 @@ export function createSound(endpoint) {
 			buffering: isBuffering,
 			playing: isBuffering===false && playing===1, paused: playing===0, ended: playing===-1,
 			volume: volumeNode.gain.value,
-			starttime: Date.now(), position: audio.currentTime, duration,
+			starttime: Date.now(), position: Math.min(duration, audio.currentTime), duration,
 		};
 	}
 
