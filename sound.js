@@ -1,6 +1,7 @@
 
 import { isSafari } from './lib/browser'
 import * as timer from 'appgine/lib/lib/timer'
+import withOffset from './adapter/withOffset'
 import createFadeArray from './lib/createFadeArray'
 import createVolumeNode from './lib/createVolumeNode'
 
@@ -44,7 +45,7 @@ export function initSound() {
 			audioAdapterFactory = require('./adapter/frames').default;
 
 		} else {
-			audioAdapterFactory = require('./adapter/audio').default;
+			audioAdapterFactory = withOffset(require('./adapter/audio').default);
 		}
 	}
 
