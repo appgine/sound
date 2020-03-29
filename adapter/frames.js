@@ -36,6 +36,7 @@ export default function create(context) {
 
 			if (audioBytesID3===false) {
 				audioBytesID3 = SoundHelper.resolveID3Size(downloadBuffer);
+				audioBridge.loadeddata && audioBridge.loadeddata();
 			}
 
 			if (audioBytesID3===false) {
