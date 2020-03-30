@@ -55,21 +55,35 @@ export default function create(context) {
 
 		function parseBuffer() {
 			let offset = 0;
+			let frame = null;
 			while (offset<downloadBuffer.length-10) {
-				const header = SoundHelper.resolveFrameHeader(downloadBuffer.slice(offset, offset+6));
+				let header = SoundHelper.resolveFrameHeader(downloadBuffer.slice(offset, offset+6));
+				let skipBuffer = header ? 0 : SoundHelper.canSkipBuffer(downloadBuffer.slice(offset));
+
+				if (frame) {
+					if (header || skipBuffer) {
+						audioFrames.push(frame);
+						audioBytes += frame.buffer.length;
+						audioDuration += frame.header.duration;
+
+					} else {
+						offset -= frame.buffer.length;
+						skipBuffer = SoundHelper.canSkipBuffer(downloadBuffer.slice(offset));
+						header = null;
+					}
+
+					frame = null;
+				}
 
 				if (header && offset+header.size>downloadBuffer.length && contentBytes>downloadBytes) {
 					break;
 
 				} else if (header) {
-					const buffer = downloadBuffer.slice(offset, offset+header.size);
-					audioFrames.push({ header, buffer });
-					offset += buffer.length;
-					audioBytes += buffer.length;
-					audioDuration += header.duration;
+					frame = { header, buffer: downloadBuffer.slice(offset, offset+header.size) }
+					offset += frame.buffer.length;
 
-				} else if (SoundHelper.canSkipBuffer(downloadBuffer)) {
-					offset += SoundHelper.canSkipBuffer(downloadBuffer);
+				} else if (skipBuffer) {
+					offset += skipBuffer;
 
 				} else {
 					offset++;
@@ -78,6 +92,12 @@ export default function create(context) {
 
 			parsed = downloadBytes>=contentBytes;
 			downloadBuffer = downloadBuffer.slice(offset);
+
+			if (parsed && frame) {
+				audioFrames.push(frame);
+				audioBytes += frame.buffer.length;
+				audioDuration += frame.header.duration;
+			}
 
 			const audioDurationEstimate = (audioDuration/audioBytes)*Math.max(0, (contentBytes-downloadBytes)+downloadBuffer.length);
 
