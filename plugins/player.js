@@ -493,12 +493,12 @@ export default function create(enabled, state, bridge) {
 				nextTrack = currentTrack && findNextSound(state.playlist, currentTrack, enabled);
 				nextSound = nextTrack && SoundStore.preload(nextTrack.url, nextTrack.labels, nextTrack.label, false);
 				nextSoundAction = null;
-
-				if (state.ending===false && nextTrack===null && currentTrack && currentTrack.sampleend && settings.sampleTime>0 && playerState.duration-computedPlayerState.position<settings.sampleTime) {
-					state.ending = true;
-					playerState.control.fadeOut(settings.sampleTime);
-				}
 		 	}
+
+			if (state.ending===false && (nextTrack===null || (nextSound && nextSound.isReady()===false)) && currentTrack && currentTrack.sampleend && settings.sampleTime>0 && playerState.duration-computedPlayerState.position<settings.sampleTime) {
+				state.ending = true;
+				playerState.control.fadeOut(settings.sampleTime);
+			}
 		}
 
 		bridge.update(computedPlayerState);
