@@ -84,7 +84,7 @@ export function preload(url, labels, label, userAction) {
 						thisTrack.sound.play();
 					}
 				},
-				pause() {
+				pause(seconds=0) {
 					timer.clearTimeout(fadeInTimeout);
 					fadeInAction && fadeInAction(false);
 					destroyFadeOut();
@@ -94,7 +94,12 @@ export function preload(url, labels, label, userAction) {
 					}
 
 					if (thisTrack===currentTrack) {
-						thisTrack.sound.pause();
+						if (seconds>0) {
+							thisTrack.sound.fadeOutQuick(seconds);
+
+						} else {
+							thisTrack.sound.pause();
+						}
 					}
 				},
 				toggle() {
