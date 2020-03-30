@@ -414,7 +414,7 @@ export default function create(enabled, state, bridge) {
 			const props = {
 				player: {
 					...playerState,
-					loading: playerState.loading || nextSoundAction!==null || state.playlist.loading,
+					loading: playerState.loading || nextSoundAction!==null || state.playlist.loading || (state.ending && nextSound!==null),
 				},
 				name: state.playlist.name,
 				playlist: state.playlist.bought ? state.playlist.tracks.filter(track => track.bought) : state.playlist.tracks,
