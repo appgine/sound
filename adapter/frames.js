@@ -82,6 +82,9 @@ export default function create(context) {
 					frame = { header, buffer: downloadBuffer.slice(offset, offset+header.size) }
 					offset += frame.buffer.length;
 
+				} else if (skipBuffer && offset+skipBuffer>downloadBuffer.length && contentBytes>downloadBytes) {
+					break;
+
 				} else if (skipBuffer) {
 					offset += skipBuffer;
 
@@ -91,13 +94,19 @@ export default function create(context) {
 			}
 
 			parsed = downloadBytes>=contentBytes;
-			downloadBuffer = downloadBuffer.slice(offset);
 
-			if (parsed && frame) {
-				audioFrames.push(frame);
-				audioBytes += frame.buffer.length;
-				audioDuration += frame.header.duration;
+			if (frame) {
+				if (parsed) {
+					audioFrames.push(frame);
+					audioBytes += frame.buffer.length;
+					audioDuration += frame.header.duration;
+
+				} else {
+					offset -= frame.buffer.length;
+				}
 			}
+
+			downloadBuffer = downloadBuffer.slice(offset);
 
 			const audioDurationEstimate = (audioDuration/audioBytes)*Math.max(0, (contentBytes-downloadBytes)+downloadBuffer.length);
 
