@@ -42,10 +42,10 @@ export function initSound() {
 
 	if (audioAdapterFactory===undefined) {
 		if (isSafari() && audioCtx && window.fetch) {
-			audioAdapterFactory = withOffset(require('./adapter/frames').default);
+			audioAdapterFactory = withOffset(require('./adapter/frames').default, false);
 
 		} else {
-			audioAdapterFactory = withOffset(require('./adapter/audio').default);
+			audioAdapterFactory = withOffset(require('./adapter/audio').default, true);
 		}
 	}
 

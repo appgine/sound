@@ -2,7 +2,7 @@
 import { getCookie, askFrameMessage } from '../lib/net'
 
 
-export default function withOffset(audioFactory)
+export default function withOffset(audioFactory, needVirtual)
 {
 	return function(audioCtx) {
 		let factory = audioFactory(audioCtx);
@@ -100,7 +100,7 @@ export default function withOffset(audioFactory)
 						} else if (currentTime<offset) {
 							return true;
 
-						} else if (virtual && currentTime<offset+audio.currentTime) {
+						} else if (needVirtual && virtual && currentTime<offset+audio.currentTime) {
 							return true;
 						}
 
