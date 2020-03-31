@@ -554,7 +554,14 @@ export default function create(enabled, state, bridge) {
 
 	const playerApi = {
 		getCurrentLabel: () => currentTrack && currentTrack.label,
-		play: () => playerState.control.play(),
+		play() {
+			if (playerState.ended) {
+				this.seek(0);
+
+			} else {
+				playerState.control.play();
+			}
+		},
 		pause: (seconds=0) => playerState.control.pause(seconds),
 		prev: () => {
 			const prevTrack = currentTrack && findPrevTrack(state.playlist, currentTrack);
