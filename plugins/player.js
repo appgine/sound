@@ -89,6 +89,7 @@ export default function create(enabled, state, bridge) {
 	}
 
 	function destroyNextSound() {
+		failedTrack = null;
 		nextTrack = null;
 		nextSound && nextSound.destroy();
 		nextSound = null;
@@ -125,6 +126,7 @@ export default function create(enabled, state, bridge) {
 	}
 
 	let currentTrack = null;
+	let failedTrack = null;
 	let nextTrack = null;
 	let nextSound = null;
 	let nextSoundAction = null;
@@ -423,6 +425,7 @@ export default function create(enabled, state, bridge) {
 					index: track.track,
 					indexSample: track.index,
 				} : null,
+				nextTrackFailed: !!failedTrack,
 				nextTrack: (nextSoundAction && nextTrack) ? {
 					...nextTrack.data,
 					index: nextTrack.track,
@@ -472,24 +475,32 @@ export default function create(enabled, state, bridge) {
 					isUserAction && bridge.userAction();
 					return true;
 
-				} else if (nextSound.isFailed(30) && (nextSoundAction || playerState.ended)) {
+				} else if (nextSound.isFailed(6) && (nextSoundAction || playerState.ended)) {
 					logFailed('sound', nextSound.label);
-					errorhub.dispatch(0, 'playerState.failed', new Error('playerState.failed'), nextTrack && nextTrack.url || 'unknown track');
-					return stopPlayer();
+					errorhub.dispatch(0, 'playerState.failed', new Error('playerState.failed'), nextSound.label || 'unknown track');
+
+					if (currentTrack===null) {
+						return stopPlayer();
+					}
+
+					const failingTrack = nextTrack || true;
+					destroyNextSound();
+					failedTrack = failingTrack;
+					return true;
 				}
 
-			} else if (nextSoundAction===null && playerState.error) {
+			} else if (nextSoundAction===null && failedTrack===null && playerState.error) {
 				nextTrack = currentTrack && findNextSound(state.playlist, currentTrack, enabled && state.autoPlayTrack, false)
 				nextSound = nextTrack && SoundStore.preload(nextTrack.url, nextTrack.labels, nextTrack.label, false);
 				nextSoundAction = null;
 
 				if (!nextTrack) {
 					logFailed('error');
-					errorhub.dispatch(0, 'playerState.error', new Error('playerState.error'), currentTrack.url);
+					errorhub.dispatch(0, 'playerState.error', new Error('playerState.error'), currentTrack.label);
 					return stopPlayer();
 				}
 
-			} else if (nextSoundAction===null && playerState.playing && playerState.duration-computedPlayerState.position<Math.max(0, settings.fadeTime, settings.sampleTime)+6) {
+			} else if (nextSoundAction===null && failedTrack===null && playerState.playing && playerState.duration-computedPlayerState.position<Math.max(0, settings.fadeTime, settings.sampleTime)+6) {
 				nextTrack = currentTrack && findNextSound(state.playlist, currentTrack, enabled);
 				nextSound = nextTrack && SoundStore.preload(nextTrack.url, nextTrack.labels, nextTrack.label, false);
 				nextSoundAction = null;
