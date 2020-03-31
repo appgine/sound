@@ -149,8 +149,8 @@ export function preload(url, labels, label, userAction) {
 		isReady() {
 			return thisSound.isReady();
 		},
-		isFailed(seconds=8) {
-			return !thisSound.isReady() && (thisSound.isFailed() || Date.now()-born>seconds*1000);
+		isFailed(seconds) {
+			return !thisSound.isReady() && (thisSound.isFailed() || (seconds>0 && Date.now()-born>seconds*1000));
 		},
 		load() {
 			paused: false,
