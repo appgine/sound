@@ -26,6 +26,7 @@ export default function create()
 		audio.addEventListener('durationchange', onDurationChange);
 		audio.addEventListener('error', onHttpError);
 		events.forEach(event => config[event] && audio.addEventListener(event, config[event]));
+		audio.load();
 
 		const control = {
 			destroy() {
