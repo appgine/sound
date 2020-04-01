@@ -475,7 +475,7 @@ export default function create(enabled, state, bridge) {
 					isUserAction && bridge.userAction();
 					return true;
 
-				} else if (nextSound.isFailed(6) && (nextSoundAction || playerState.ended)) {
+				} else if (nextSound.isFailed(30) && (nextSoundAction || playerState.ended)) {
 					logFailed('sound', nextSound.label);
 					errorhub.dispatch(0, 'playerState.failed', new Error('playerState.failed'), nextSound.label || 'unknown track');
 
