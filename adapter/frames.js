@@ -300,7 +300,7 @@ export default function create(context) {
 			destroy() {
 				this.pause();
 				playing = -1;
-			}
+			},
 		}
 
 		Object.defineProperty(control, 'buffered', {

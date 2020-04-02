@@ -82,7 +82,7 @@ export default function withOffset(audioFactory, needVirtual)
 				play() {
 					paused = false;
 					audio && audio.play();
-				}
+				},
 			}
 
 			Object.defineProperty(control, 'currentTime', {

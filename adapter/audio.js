@@ -42,7 +42,7 @@ export default function create()
 			},
 			play() {
 				audio.play();
-			}
+			},
 		}
 
 		Object.defineProperty(control, 'buffered', {
