@@ -30,7 +30,7 @@ export function initSound() {
 	if (audioCtx===undefined) {
 		audioCtx = null;
 
-		if (window.AudioContext || window.webkitAudioContext) {
+		if (isFadeSupported()) {
 			audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 		}
 
@@ -41,7 +41,7 @@ export function initSound() {
 	}
 
 	if (audioAdapterFactory===undefined) {
-		if (isSafari() && audioCtx && window.fetch) {
+		if (isSafari() && audioCtx) {
 			audioAdapterFactory = withOffset(require('./adapter/frames').default, false);
 
 		} else {
@@ -60,7 +60,7 @@ export function initSound() {
 
 
 export function isFadeSupported() {
-	return !!(audioCtx || window.AudioContext || window.webkitAudioContext);
+	return !!(window.fetch && (window.AudioContext || window.webkitAudioContext));
 }
 
 
