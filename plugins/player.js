@@ -550,7 +550,7 @@ export default function create(enabled, state, bridge) {
 		return { duration, position, positionTrack, positionWidth, bufferedWidth }
 	}
 
-	timer.setTimeout(render, 0);
+	setTimeout(render, 0);
 
 	const playerApi = {
 		getCurrentLabel: () => currentTrack && currentTrack.label,
