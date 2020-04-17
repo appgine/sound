@@ -14,6 +14,7 @@ export default function create()
 
 		connectVolume(audio);
 		audio.crossOrigin = "use-credentials";
+		audio.type = 'audio/mpeg';
 		audio.src = endpoint;
 
 		const onLoadedData = () => config.loadeddata();
