@@ -301,6 +301,9 @@ export default function create(context) {
 				this.pause();
 				playing = -1;
 			},
+			getLastError() {
+				return [];
+			},
 		}
 
 		Object.defineProperty(control, 'buffered', {

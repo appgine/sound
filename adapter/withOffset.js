@@ -83,6 +83,9 @@ export default function withOffset(audioFactory, needVirtual)
 					paused = false;
 					audio && audio.play();
 				},
+				getLastError() {
+					return handler.getLastError() || null;
+				},
 			}
 
 			Object.defineProperty(control, 'currentTime', {

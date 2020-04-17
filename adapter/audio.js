@@ -43,6 +43,9 @@ export default function create()
 			play() {
 				audio.play();
 			},
+			getLastError() {
+				return [];
+			},
 		}
 
 		Object.defineProperty(control, 'buffered', {

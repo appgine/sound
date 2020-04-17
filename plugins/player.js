@@ -477,7 +477,8 @@ export default function create(enabled, state, bridge) {
 
 				} else if (nextSound.isFailed(30) && (nextSoundAction || playerState.ended)) {
 					logFailed('sound', nextSound.label);
-					errorhub.dispatch(0, 'playerState.failed', new Error('playerState.failed'), nextSound.label || 'unknown track');
+					const errorName = nextSound.isFailed() ? 'playerState.failed' : 'playerState.timeout';
+					errorhub.dispatch(0, errorName, new Error(errorName), nextSound.label || 'unknown track', nextSound.getLastError());
 
 					if (currentTrack===null) {
 						return stopPlayer();

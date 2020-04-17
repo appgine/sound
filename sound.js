@@ -248,6 +248,9 @@ export function createSound(endpoint) {
 		getState() {
 			return createState();
 		},
+		getLastError() {
+			return audio.getLastError();
+		},
 		isReady() {
 			return playing!==null;
 		},

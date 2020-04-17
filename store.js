@@ -152,6 +152,9 @@ export function preload(url, labels, label, userAction) {
 		isFailed(seconds) {
 			return !thisSound.isReady() && (thisSound.isFailed() || (seconds>0 && Date.now()-born>seconds*1000));
 		},
+		getLastError() {
+			return thisSound.getLastError();
+		},
 		load() {
 			paused: false,
 			internalDestroy();
