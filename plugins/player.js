@@ -177,8 +177,8 @@ export default function create(enabled, state, bridge) {
 
 	this.listen('player', 'prev', () => playerApi.prev());
 	this.listen('player', 'next', () => playerApi.next());
-	this.listen('player', 'seekbackward', () => playerState.playing && playerApi.seek(Math.max(0.0, (computePlayerState().position-Math.min(15, playerState.duration*0.1))/playerState.duration)));
-	this.listen('player', 'seekforward', () => playerState.playing && playerApi.seek(Math.min(1.0, (computePlayerState().position+Math.min(15, playerState.duration*0.1))/playerState.duration)));
+	this.listen('player', 'seekbackward', () => playerState.playing && playerApi.seek(Math.max(0.0, (computePlayerState().currentTime-Math.min(15, playerState.duration*0.1))/playerState.duration)));
+	this.listen('player', 'seekforward', () => playerState.playing && playerApi.seek(Math.min(1.0, (computePlayerState().currentTime+Math.min(15, playerState.duration*0.1))/playerState.duration)));
 
 	targets.complete(updateActivePlaylist);
 
@@ -332,7 +332,7 @@ export default function create(enabled, state, bridge) {
 	}
 
 	function playNextSound(sound, pending) {
-		const { position, duration } = computePlayerState();
+		const { currentTime, duration } = computePlayerState();
 
 		let endOffset = 0;
 		let fn = sound.play.bind(null, Math.max(0, settings.sampleTime), nextTrack && nextTrack.samplestart && Math.max(0, settings.sampleTime) || 0);
@@ -364,12 +364,12 @@ export default function create(enabled, state, bridge) {
 			endOffset = settings.fadeTime;
 			fn = sound.fade.bind(null, settings.fadeTime);
 
-		} else if (settings.sampleTime>0 && (currentTrack.sampleend || position<duration)) {
+		} else if (settings.sampleTime>0 && (currentTrack.sampleend || currentTime<duration)) {
 			endOffset = settings.sampleTime;
 			fn = sound.play.bind(null, settings.sampleTime, nextTrack.samplestart && settings.sampleTime || 0);
 		}
 
-		if (pending || duration-position <= endOffset) {
+		if (pending || duration-currentTime <= endOffset) {
 			return fn;
 		}
 
@@ -518,20 +518,18 @@ export default function create(enabled, state, bridge) {
 
 	function computePlayerState(percent=null) {
 		let duration = parseInt(playerState.duration, 10);
-		let position = Math.min(duration, playerState.position + (playerState.playing ? (Date.now()-playerState.starttime)/1000 : 0.0));
+		let currentTime = Math.min(duration, playerState.position + (playerState.playing ? (Date.now()-playerState.starttime)/1000 : 0.0));
 
 		if (currentTrack && currentTrack.ended) {
-			position = playerState.duration;
+			currentTime = playerState.duration;
 
-		} else if (state.seeking) {
-			position = playerState.duration*state.seeking;
-
-		} else if (!currentTrack) {
-			if (!nextTrack || nextTrack.label!==playerState.label) {
-				position = 0;
+		} else if (currentTrack===null) {
+			if (nextTrack===null || nextTrack.label!==playerState.label) {
+				currentTime = 0;
 			}
 		}
 
+		let position = state.seeking ? playerState.duration*state.seeking : currentTime;
 		let positionTrack = position;
 		let positionWidth = '0%';
 		let bufferedWidth = '0%';
@@ -548,7 +546,7 @@ export default function create(enabled, state, bridge) {
 			bufferedWidth = String(left+width)+'%';
 		}
 
-		return { duration, position, positionTrack, positionWidth, bufferedWidth }
+		return { duration, currentTime, position, positionTrack, positionWidth, bufferedWidth }
 	}
 
 	setTimeout(render, 0);
