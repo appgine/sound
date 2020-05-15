@@ -488,6 +488,9 @@ export default function create(enabled, state, bridge) {
 					destroyNextSound();
 					failedTrack = failingTrack;
 					return true;
+
+				} else if (playerState.ended) {
+					nextSoundAction = nextSound;
 				}
 
 			} else if (nextSoundAction===null && failedTrack===null && playerState.error) {
