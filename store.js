@@ -81,10 +81,12 @@ export function preload(url, labels, label, userAction) {
 					}
 
 					if (thisTrack===currentTrack) {
+						thisTrack.paused = false;
 						thisTrack.sound.play();
 					}
 				},
 				pause(seconds=0) {
+					thisTrack.paused = true;
 					timer.clearTimeout(fadeInTimeout);
 					fadeInAction && fadeInAction(false);
 					destroyFadeOut();
@@ -93,7 +95,7 @@ export function preload(url, labels, label, userAction) {
 						nextTrack.paused = true;
 					}
 
-					if (thisTrack===currentTrack) {
+					if (thisTrack===currentTrack && thisTrack.state.paused===false) {
 						if (seconds>0) {
 							thisTrack.sound.fadeOutQuick(seconds);
 
@@ -118,6 +120,7 @@ export function preload(url, labels, label, userAction) {
 				seek(percent) {
 					if (thisTrack===nextTrack || thisTrack===currentTrack) {
 						if (thisTrack===currentTrack) {
+							thisTrack.paused = false;
 							destroyFadeOut();
 						}
 
@@ -126,6 +129,10 @@ export function preload(url, labels, label, userAction) {
 					}
 				},
 				fadeOut(seconds) {
+					timer.setTimeout(function() {
+						thisTrack.paused = true;
+					}, seconds*1000);
+
 					thisTrack.sound.fadeOut(seconds);
 				}
 			}
@@ -172,9 +179,13 @@ export function preload(url, labels, label, userAction) {
 			timer.clearTimeout(fadeInTimeout);
 
 			if (fadeOut>0) {
+				fadeInTimeout = timer.setTimeout(function() {
+					currentTrack.paused = true;
+					fadeInAction && fadeInAction(true)
+				}, fadeOut*1000);
+
 				currentTrack.sound.fadeOutQuick(fadeOut);
 				nextTrack = createTrack();
-				fadeInTimeout = timer.setTimeout(() => fadeInAction && fadeInAction(true), fadeOut*1000);
 				notify();
 
 			} else {
@@ -248,6 +259,18 @@ function changeSound(thisTrack, fadeIn) {
 			} else {
 				currentTrack.dirty = false;
 				Object.assign(currentTrack.state, {...currentState, initial: false})
+
+				if (currentTrack.paused===false && currentState.paused) {
+					currentTrack.paused = true;
+
+					if (currentState.ended===false) {
+						currentTrack.control.pause();
+					}
+
+				} else if (currentState.playing) {
+					currentTrack.paused = false;
+				}
+
 				notify();
 			}
 		}
@@ -263,6 +286,7 @@ function internalDestroy(seconds=0) {
 	timer.clearTimeout(fadeInTimeout);
 	fadeInAction = null;
 	destroyFadeOut();
+	currentTrack && (currentTrack.paused = true);
 	currentTrack && currentTrack.sound.fadeOut(seconds);
 	currentTrack = null;
 	nextTrack = null;

@@ -112,6 +112,7 @@ export function createSound(endpoint) {
 			notify();
 		},
 		seeking() {
+			buffering = true;
 			notifyNext();
 		},
 		seeked() {
@@ -142,9 +143,21 @@ export function createSound(endpoint) {
 			error = _error||-1;
 			notify();
 		},
+		pause() {
+			if (playing>0 || buffering) {
+				playing = audio.currentTime>=duration ? -1 : 0;
+				buffering = false;
+				notify();
+				fadePlayer(true, false);
+			}
+		},
 		playing() {
 			buffering = false;
 			notify();
+
+			if (playing<=0) {
+				fadePlayer(true, true);
+			}
 		},
 	};
 

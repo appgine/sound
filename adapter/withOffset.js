@@ -24,6 +24,12 @@ export default function withOffset(audioFactory, needVirtual)
 					seeking() { handler===thisAudio && config.seeking(); },
 					seeked() { handler===thisAudio && config.seeked(); },
 					waiting() { handler===thisAudio && config.waiting(); },
+					pause() {
+						if (handler===thisAudio) {
+							paused = true;
+							config.pause();
+						}
+					},
 					playing() { handler===thisAudio && config.playing(); },
 					error(...args) { handler===thisAudio && config.error(...args); },
 					durationchange(duration) {
