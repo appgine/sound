@@ -125,12 +125,12 @@ export default function create(context) {
 			decodeBuffer();
 		}
 
-		let decoding = 0;
+		let decoding = null;
 		function decodeBuffer() {
 			if (playing<=0 && seeking===false) {
 				return false;
 
-			} else if (decoding>0 || nextSource!==null) {
+			} else if (decoding || nextSource!==null) {
 				return false;
 			}
 
@@ -161,14 +161,18 @@ export default function create(context) {
 				const samples = frames.reduce((total, { header }) => total+header.samples, 0);
 				const duration = samples/frames[0].header.sample_rate/frames.length;
 
-				decoding = 1;
-				context.decodeAudioData(buffer.buffer, function(buffer) {
-					decoding = 0;
+				decoding = buffer;
+				context.decodeAudioData(buffer.buffer, function(decodedBuffer) {
+					if (decoding!==buffer) {
+						return null;
+					}
+
+					decoding = null;
 
 					const volumeNode = context.createGain();
 					const source = tmpsource || context.createBufferSource();
 					tmpsource = null;
-					source.buffer = buffer;
+					source.buffer = decodedBuffer;
 
 					connectVolume(volumeNode);
 					source.connect(volumeNode);
@@ -218,7 +222,6 @@ export default function create(context) {
 					}
 
 				}, function(e) {
-					decoding = 2;
 					audioBridge.error(-3); // corrupt - failed decoding audio
 				});
 			}
@@ -273,6 +276,7 @@ export default function create(context) {
 
 		function pauseState(currentTime) {
 			stopSource();
+			decoding = null;
 			const thisFrame = Math.ceil(endFrame/(endTime-startTime)*currentTime);
 			const position = (thisFrame/endFrame)*(endTime-startTime);
 			startTime = context.currentTime-position;
