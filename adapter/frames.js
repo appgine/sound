@@ -271,16 +271,20 @@ export default function create(context) {
 			read();
 		}).catch(() => audioBridge.error(-1));
 
+		function pauseState(currentTime) {
+			stopSource();
+			const thisFrame = Math.ceil(endFrame/(endTime-startTime)*currentTime);
+			const position = (thisFrame/endFrame)*(endTime-startTime);
+			startTime = context.currentTime-position;
+			endTime = context.currentTime;
+			endFrame = thisFrame;
+		}
+
 		const control = {
 			pause() {
 				if (playing>0) {
-					const thisFrame = Math.ceil(endFrame/(endTime-startTime)*this.currentTime);
-					const position = (thisFrame/endFrame)*(endTime-startTime);
-					startTime = context.currentTime-position;
-					endTime = context.currentTime;
-					endFrame = thisFrame;
 					playing = 0;
-					stopSource();
+					pauseState(this.currentTime);
 				}
 			},
 			play() {
@@ -313,12 +317,7 @@ export default function create(context) {
 		Object.defineProperty(control, 'currentTime', {
 			get() { return Math.min(endTime, context.currentTime)-startTime },
 			set(currentTime) {
-				stopSource();
-				const thisFrame = Math.ceil(endFrame/(endTime-startTime)*currentTime);
-				const position = (thisFrame/endFrame)*(endTime-startTime);
-				startTime = context.currentTime-position;
-				endTime = context.currentTime;
-				endFrame = thisFrame;
+				pauseState(currentTime);
 				seeking = true;
 				audioBridge.seeking();
 				decodeBuffer();
