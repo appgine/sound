@@ -286,7 +286,6 @@ function internalDestroy(seconds=0) {
 	timer.clearTimeout(fadeInTimeout);
 	fadeInAction = null;
 	destroyFadeOut();
-	currentTrack && (currentTrack.paused = true);
 	currentTrack && currentTrack.sound.fadeOut(seconds);
 	currentTrack = null;
 	nextTrack = null;
