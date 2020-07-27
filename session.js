@@ -4,6 +4,8 @@ import * as sound from './sound'
 import * as helper from './lib/helper'
 import { isSafari } from './lib/browser'
 
+import { useListen, bindDispatch } from 'appgine/hooks/channel'
+
 let state = SoundStore.initialMonitor();
 let handlers = 0;
 let source = null;
@@ -16,7 +18,7 @@ sound.onInit(function(_audioCtx) {
 });
 
 export default function create() {
-	const dispatchPlayer = this.dispatch.bind(this, 'player');
+	const dispatchPlayer = bindDispatch('player');
 
 	function createAudio() {
 		if (audio===null) {
@@ -98,7 +100,7 @@ export default function create() {
 		}
 	}
 
-	this.listen('player-track', function(track) {
+	useListen('player-track', function(track) {
 		if (audio) {
 			audio.title = track.data.name;
 		}

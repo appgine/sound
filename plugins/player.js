@@ -1,20 +1,28 @@
 
-import { uri } from 'appgine/lib/closure'
-import * as timer from 'appgine/lib/lib/timer'
+import { uri } from 'appgine/closure'
 import * as errorhub from 'appgine/errorhub'
 import * as SoundStore from '../store'
 import domDistance, { domDistanceCompare } from '../lib/dom-distance'
 import { findCurrentTrack, findNextSound, findNextTrack, findPrevTrack, formatPlaylistTrack } from '../lib/playlist'
 export { isFadeSupported } from '../store'
 
-export default function create(enabled, state, bridge) {
+import { useTimeout } from 'appgine/hooks/timer'
+import { setBackgroundTimeout, bindInterval } from 'appgine/hooks/backgroundTimer'
+import { useListen, bindDispatch } from 'appgine/hooks/channel'
+import { useTargets, useComplete } from 'appgine/hooks/target'
+import { useEvent } from 'appgine/hooks/event'
+import { useDestroy } from 'appgine/hooks/destroy'
+import { bindPluginAjax } from 'appgine/hooks/ajax'
+
+
+export default function create(enabled, bridge, state={}) {
 	enabled = !!enabled;
 
 	let playerState = SoundStore.initialMonitor();
 
-	const dispatchTrack = this.dispatch.bind(this, 'player-track');
-	const logFailed = this.dispatch.bind(this, 'player-failed');
-	const logSource = this.dispatch.bind(this, 'player-source');
+	const dispatchTrack = bindDispatch('player-track');
+	const logFailed = bindDispatch('player-failed');
+	const logSource = bindDispatch('player-source');
 
 	const settings = {
 		fadeTime: false,
@@ -22,8 +30,9 @@ export default function create(enabled, state, bridge) {
 		repeat: false,
 	}
 
-	let updateinterval = null;
-	state.initial({
+	const [ useInterval, destroyInterval ] = bindInterval(update, 250);
+
+	Object.assign(state, {
 		visible: false,
 		rendering: null,
 		autoPlaySource: false,
@@ -42,8 +51,10 @@ export default function create(enabled, state, bridge) {
 		},
 	});
 
-	const targets = this.createTargets();
-	const ajax = this.ajax.bind(this);
+	const [useAjax] = bindPluginAjax();
+
+	const playlistList = useTargets('playlist', ($playlist, { data }) => { $playlist, data });
+	const sourceList = useTargets('source', ($source, { data }) => ({ $source, data }));
 
 	function canToggleBought() {
 		const numOfBoughtTracks = state.playlist.tracks.filter(track => track.bought).length;
@@ -75,8 +86,7 @@ export default function create(enabled, state, bridge) {
 	function stopPlayer() {
 		SoundStore.destroy(2);
 		playerState = SoundStore.initialMonitor();
-		timer.clearInterval(updateinterval);
-		updateinterval = null;
+		destroyInterval();
 		currentTrack = null;
 		destroyNextSound();
 		state.labels = [];
@@ -98,13 +108,13 @@ export default function create(enabled, state, bridge) {
 
 	function findCurrentSource($element) {
 		let best = null;
-		for (let target of targets.findAll('source')) {
+		for (let { $source, data } of sourceList) {
 			if ($element) {
-				const distance = domDistance($element, target.$target, true);
+				const distance = domDistance($element, $source, true);
 
 				if (distance) {
-					distance.data = target.data;
-					distance.disabled = state.playlist.disabled.indexOf(target.data)!==-1
+					distance.data = data;
+					distance.disabled = state.playlist.disabled.indexOf(data)!==-1
 
 					if (best===null) {
 						best = distance
@@ -117,8 +127,8 @@ export default function create(enabled, state, bridge) {
 					}
 				}
 
-			} else if (state.playlist.disabled.indexOf(target.data)===-1) {
-				return target.data;
+			} else if (state.playlist.disabled.indexOf(data)===-1) {
+				return data;
 			}
 		}
 
@@ -165,8 +175,8 @@ export default function create(enabled, state, bridge) {
 		}
 	}
 
-	this.listen('play', onPlayEvent);
-	this.listen('autoplay', function($element, url, labels, label) {
+	useListen('play', onPlayEvent);
+	useListen('autoplay', function($element, url, labels, label) {
 		if (nextTrack && nextTrack.label===label) {
 			nextSoundAction = nextSound;
 
@@ -175,18 +185,18 @@ export default function create(enabled, state, bridge) {
 		}
 	});
 
-	this.listen('player', 'prev', () => playerApi.prev());
-	this.listen('player', 'next', () => playerApi.next());
-	this.listen('player', 'seekbackward', () => playerState.playing && playerApi.seek(Math.max(0.0, (computePlayerState().currentTime-Math.min(15, playerState.duration*0.1))/playerState.duration)));
-	this.listen('player', 'seekforward', () => playerState.playing && playerApi.seek(Math.min(1.0, (computePlayerState().currentTime+Math.min(15, playerState.duration*0.1))/playerState.duration)));
+	useListen('player', 'prev', () => playerApi.prev());
+	useListen('player', 'next', () => playerApi.next());
+	useListen('player', 'seekbackward', () => playerState.playing && playerApi.seek(Math.max(0.0, (computePlayerState().currentTime-Math.min(15, playerState.duration*0.1))/playerState.duration)));
+	useListen('player', 'seekforward', () => playerState.playing && playerApi.seek(Math.min(1.0, (computePlayerState().currentTime+Math.min(15, playerState.duration*0.1))/playerState.duration)));
 
-	targets.complete(updateActivePlaylist);
+	useComplete(() => { updateActivePlaylist(); });
 
-	targets.every(['container', 'source', 'playlist'], function($container) {
+	useTargets(['container', 'source', 'playlist'], function($container) {
 		$container.classList.toggle('hidden', enabled===false);
 	});
 
-	targets.every(['source', 'playlist'], function($btn, target) {
+	useTargets(['source', 'playlist'], function($btn, target) {
 		const source = typeof target.data==='string' ? target.data : target.data.source;
 		const label = typeof target.data==='object' && target.data.label || null;
 		const playBought = typeof target.data==='object' && target.data.playBought || false;
@@ -198,28 +208,24 @@ export default function create(enabled, state, bridge) {
 		}
 	});
 
-	targets.every('playlist', function($btn, target) {
+	useTargets('playlist', function($btn, target) {
 		const source = typeof target.data==='string' ? target.data : target.data.source;
 		const label = typeof target.data==='object' && target.data.label || null;
 		const playBought = typeof target.data==='object' && target.data.playBought || false;
 
-		function onClick(e) {
+		useEvent($btn, 'click', function(e) {
 			e && e.preventDefault();
 			toggleSource(source, label, playBought, true);
-		}
+		});
 
-		$btn.addEventListener('click', onClick);
-		return function() {
-			$btn.removeEventListener('click', onClick)
-			$btn.classList.remove('active');
-		}
+		useDestroy(() => $btn.classList.remove('active'));
 	});
 
 	const monitor = SoundStore.connectMonitor();
 
 	monitor.then(function(currentState) {
-		if (updateinterval===null && (state.visible || nextSound || nextSoundAction)) {
-			updateinterval = timer.setInterval(update, 250);
+		if (state.visible || nextSound || nextSoundAction) {
+			useInterval();
 		}
 
 		if (currentState.label && nextSound===null && nextTrack && nextTrack.label===currentState.label) {
@@ -230,7 +236,7 @@ export default function create(enabled, state, bridge) {
 		playerState = currentState;
 		state.ending = false;
 		shouldUpdate && update();
-		shouldUpdate ? timer.setTimeout(render, 0) : render();
+		shouldUpdate ? setBackgroundTimeout(render, 0) : render();
 	});
 
 	function toggleSource(source, label, playBought, play=false) {
@@ -262,9 +268,9 @@ export default function create(enabled, state, bridge) {
 
 			render(true);
 
-			timer.setTimeout(function() {
+			setBackgroundTimeout(function() {
 				logSource(source, 'load');
-				ajax(source, function(status, response) {
+				useAjax(source, function(status, response) {
 					if (state.playlist.id===source) {
 						const tracks = response && response.json && Array.isArray(response.json.playlist) ? response.json.playlist : [];
 
@@ -377,21 +383,18 @@ export default function create(enabled, state, bridge) {
 	}
 
 	function updateActivePlaylist() {
-		targets.findAll('playlist', function(target) {
-			const source = typeof target.data==='string' ? target.data : target.data.source;
-			const label = typeof target.data==='object' && target.data.label || null;
+		playlistList.forEach(function({ $playlist, data }) {
+			const source = typeof data==='string' ? data : data.source;
+			const label = typeof data==='object' && data && data.label || null;
 			const active = (((state.visible || state.playlist.loading) && state.playlist.id===source) || (label && state.labels.indexOf(label)!==-1));
 			const playing = active && (playerState.playing || playerState.buffering || state.playlist.loading || nextSoundAction);
 
-			target.$element.classList.toggle('active', active);
-			target.$element.classList.toggle('playing', playing);
-			target.$element.disabled = state.playlist.disabled.indexOf(source)!==-1;
+			$playlist.classList.toggle('active', active);
+			$playlist.classList.toggle('playing', playing);
+			$playlist.disabled = state.playlist.disabled.indexOf(source)!==-1;
 		});
 
-		let connected = false;
-		targets.findAll('source', function(target) {
-			connected = connected || state.playlist.id===target.data;
-		});
+		let connected = sourceList.some(({ data }) => state.playlist.id===data);
 
 		if (enabled===false && playerState.playing && connected===false && playerState.connected===false) {
 			stopPlayer();
@@ -552,7 +555,7 @@ export default function create(enabled, state, bridge) {
 		return { duration, currentTime, position, positionTrack, positionWidth, bufferedWidth }
 	}
 
-	setTimeout(render, 0);
+	useTimeout(render, 0);
 
 	const playerApi = {
 		getCurrentLabel: () => currentTrack && currentTrack.label,
@@ -574,8 +577,7 @@ export default function create(enabled, state, bridge) {
 			nextTrack && loadTrack(nextTrack.track, nextTrack.index);
 		},
 		seek(percent) {
-			timer.clearInterval(updateinterval);
-			updateinterval = null;
+			destroyInterval();
 			playerState.control.seek(percent);
 		},
 		setAutoPlay: (autoPlayTrack=true) => state.autoPlayTrack = !!autoPlayTrack,
@@ -621,7 +623,7 @@ export default function create(enabled, state, bridge) {
 		destroy() {
 			enabled = false;
 			monitor();
-			timer.clearInterval(updateinterval);
+			destroyInterval();
 		}
 	}
 

@@ -1,9 +1,10 @@
 
 import { isSafari } from './lib/browser'
-import * as timer from 'appgine/lib/lib/timer'
 import withOffset from './adapter/withOffset'
 import createFadeArray from './lib/createFadeArray'
 import createVolumeNode from './lib/createVolumeNode'
+
+import * as timer from 'appgine/hooks/backgroundTimer'
 
 
 export function defaultState() {
@@ -171,13 +172,13 @@ export function createSound(endpoint) {
 
 	let notifytimeout = null;
 	function notify() {
-		timer.clearTimeout(notifytimeout);
+		timer.clearBackgroundTimeout(notifytimeout);
 		listeners.state.filter(_ => true).forEach(fn => fn(createState()));
 	}
 
 	function notifyNext() {
-		timer.clearTimeout(notifytimeout);
-		notifytimeout = timer.setTimeout(notify, 100);
+		timer.clearBackgroundTimeout(notifytimeout);
+		notifytimeout = timer.setBackgroundTimeout(notify, 100);
 	}
 
 	function changeVolume(volume) {
@@ -231,7 +232,7 @@ export function createSound(endpoint) {
 			}
 
 		} else if (playing>0 && fadeNode) {
-			timer.setTimeout(() => newFadeNode===fadeNode && pauseState(), seconds*1000);
+			timer.setBackgroundTimeout(() => newFadeNode===fadeNode && pauseState(), seconds*1000);
 
 		} else if (playing>0) {
 			pauseState();

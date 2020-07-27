@@ -18,6 +18,9 @@
     "sound.js",
     "store.js"
   ],
+  "dependencies": {
+    "appgine": ">=0.26.0"
+  },
   "scripts": {},
   "bugs": {
     "url": "https://github.com/appgine/sound/issues"

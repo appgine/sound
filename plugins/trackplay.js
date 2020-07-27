@@ -1,19 +1,22 @@
 
 import * as SoundStore from '../store'
-import { dom } from 'appgine/lib/closure'
+import { dom } from 'appgine/closure'
 import createCanvas from '../lib/createCanvas'
 import renderCanvasArc from '../lib/renderCanvasArc'
+
+import { useEvent } from 'appgine/hooks/event'
+import { bindDispatch } from 'appgine/hooks/channel'
 
 
 export default function create($element, { url, label, sample }) {
 	const state = {};
-	const play = this.dispatch.bind(this, 'play');
-	const log = this.dispatch.bind(this, 'trackplay');
+	const play = bindDispatch('play');
+	const log = bindDispatch('trackplay');
 
 	const handler = SoundStore.connect(label);
 	handler.then(render);
 
-	this.event($element, 'click', e => {
+	useEvent($element, 'click', e => {
 		if (e && dom.getLink(e) && (e.metaKey || e.ctrlKey)) {
 			if (state.isCurrent) {
 				log(label, 'blank');
