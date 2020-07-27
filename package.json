@@ -16,7 +16,8 @@
     "adapter",
     "plugins",
     "sound.js",
-    "store.js"
+    "store.js",
+    "session.js"
   ],
   "dependencies": {
     "appgine": ">=0.26.0"
