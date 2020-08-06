@@ -53,7 +53,7 @@ export default function create(enabled, bridge, state={}) {
 
 	const [useAjax] = bindPluginAjax();
 
-	const playlistList = useTargets('playlist', ($playlist, { data }) => { $playlist, data });
+	const playlistList = useTargets('playlist', ($playlist, { data }) => ({ $playlist, data }));
 	const sourceList = useTargets('source', ($source, { data }) => ({ $source, data }));
 
 	function canToggleBought() {
