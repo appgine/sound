@@ -155,7 +155,10 @@ export function createSound(endpoint) {
 		playing() {
 			buffering = false;
 			notify();
-			fadePlayer(true, true);
+
+			if (playing<=0) {
+				fadePlayer(true, true);
+			}
 		},
 	};
 
