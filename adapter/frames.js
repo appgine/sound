@@ -97,6 +97,9 @@ export default function create(context) {
 				} else if (skipBuffer) {
 					downloadOffset += skipBuffer;
 
+				} else if (downloadOffset>SoundHelper.getMaxFrameSize()) {
+					return audioBridge.error(-1);
+
 				} else {
 					downloadOffset++;
 				}
