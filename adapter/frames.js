@@ -20,6 +20,7 @@ export default function create(context) {
 
 		let downloadStart = context.currentTime;
 		let downloadBytes = 0;
+		let downloadOffset = 0;
 		let downloadBuffer = new Uint8Array(0);
 		let contentBytes = Infinity;
 
@@ -54,11 +55,10 @@ export default function create(context) {
 		}
 
 		function parseBuffer() {
-			let offset = 0;
 			let frame = null;
-			while (offset<downloadBuffer.length-10) {
-				let header = SoundHelper.resolveFrameHeader(downloadBuffer.slice(offset, offset+6));
-				let skipBuffer = header ? 0 : SoundHelper.canSkipBuffer(downloadBuffer.slice(offset));
+			while (downloadOffset<downloadBuffer.length-10) {
+				let header = SoundHelper.resolveFrameHeader(downloadBuffer.slice(downloadOffset, downloadOffset+6));
+				let skipBuffer = header ? 0 : SoundHelper.canSkipBuffer(downloadBuffer.slice(downloadOffset));
 
 				if (frame) {
 					if (header || skipBuffer) {
@@ -67,29 +67,29 @@ export default function create(context) {
 						audioDuration += frame.header.duration;
 
 					} else {
-						offset -= frame.buffer.length;
-						skipBuffer = SoundHelper.canSkipBuffer(downloadBuffer.slice(offset));
+						downloadOffset -= frame.buffer.length;
+						skipBuffer = SoundHelper.canSkipBuffer(downloadBuffer.slice(downloadOffset));
 						header = null;
 					}
 
 					frame = null;
 				}
 
-				if (header && offset+header.size>downloadBuffer.length && contentBytes>downloadBytes) {
+				if (header && downloadOffset+header.size>downloadBuffer.length && contentBytes>downloadBytes) {
 					break;
 
 				} else if (header) {
-					frame = { header, buffer: downloadBuffer.slice(offset, offset+header.size) }
-					offset += frame.buffer.length;
 
 				} else if (skipBuffer && offset+skipBuffer>downloadBuffer.length && contentBytes>downloadBytes) {
 					break;
+					frame = { header, buffer: downloadBuffer.slice(downloadOffset, downloadOffset+header.size) }
+					downloadOffset += frame.buffer.length;
 
 				} else if (skipBuffer) {
-					offset += skipBuffer;
+					downloadOffset += skipBuffer;
 
 				} else {
-					offset++;
+					downloadOffset++;
 				}
 			}
 
@@ -102,11 +102,12 @@ export default function create(context) {
 					audioDuration += frame.header.duration;
 
 				} else {
-					offset -= frame.buffer.length;
+					downloadOffset -= frame.buffer.length;
 				}
 			}
 
-			downloadBuffer = downloadBuffer.slice(offset);
+			downloadBuffer = downloadBuffer.slice(downloadOffset);
+			downloadOffset = 0;
 
 			const audioDurationEstimate = (audioDuration/audioBytes)*Math.max(0, (contentBytes-downloadBytes)+downloadBuffer.length);
 
