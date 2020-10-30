@@ -88,9 +88,6 @@ export default function create(context) {
 					break;
 
 				} else if (header) {
-
-				} else if (skipBuffer && offset+skipBuffer>downloadBuffer.length && contentBytes>downloadBytes) {
-					break;
 					frame = { header, buffer: downloadBuffer.slice(downloadOffset, downloadOffset+header.size) }
 					downloadOffset += frame.buffer.length;
 
