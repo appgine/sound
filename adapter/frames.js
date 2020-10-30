@@ -38,7 +38,7 @@ export default function create(context) {
 		let endTime = 0.0;
 
 		function mergeBuffer(buffer) {
-			downloadBuffer = SoundHelper.mergeBuffers([downloadBuffer, SoundHelper.decodeBuffer(buffer, 0)]);
+			downloadBuffer = SoundHelper.mergeBuffers([downloadBuffer, buffer]);
 
 			if (audioBytesID3===false) {
 				audioBytesID3 = SoundHelper.resolveID3Size(downloadBuffer);
@@ -263,7 +263,7 @@ export default function create(context) {
 				reader.read().then(({ done, value }) => {
 					if (value) {
 						downloadBytes += value.length;
-						mergeBuffer(value);
+						mergeBuffer(SoundHelper.decodeBuffer(value, 0));
 					}
 
 					contentBytes = done ? downloadBytes : Math.max(contentBytes, downloadBytes);
