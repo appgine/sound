@@ -1,0 +1,14 @@
+
+MAX MPEG frame size
+https://www.mars.org/pipermail/mad-dev/2002-January/000425.html
+
+The absolute theoretical maximum frame size is 2881 bytes: MPEG 2.5 Layer II,
+8000 Hz @ 160 kbps, with a padding slot. (Such a frame is unlikely, but it was
+a useful exercise to compute all possible frame sizes.) Add to this an 8 byte
+MAD_BUFFER_GUARD, and the minimum buffer size you should be streaming to
+libmad in the general case is 2889 bytes.
+
+Theoretical frame sizes for Layer III range from 24 to 1441 bytes, but there
+is a "soft" limit imposed by the standard of 960 bytes. Nonetheless MAD can
+decode frames of any size as long as they fit entirely in the buffer you pass,
+not including the MAD_BUFFER_GUARD bytes.
