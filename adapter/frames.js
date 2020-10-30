@@ -66,6 +66,10 @@ export default function create(context) {
 				let skipBuffer = header ? 0 : SoundHelper.canSkipBuffer(downloadBuffer.slice(downloadOffset));
 
 				if (frame) {
+					if (header && header.key!==frame.header.key) {
+						header = null;
+					}
+
 					if (header || skipBuffer) {
 						audioFrames.push(frame);
 						audioBytes += frame.buffer.length;
