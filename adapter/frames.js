@@ -2,6 +2,11 @@
 import * as SoundHelper from '../lib/helper.js'
 
 
+export function canUse() {
+	return !!(window.fetch && window.ReadableStream && window.ReadableStream);
+}
+
+
 export default function create(context) {
 
 	let tmpsource = context.createBufferSource();
