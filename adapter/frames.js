@@ -261,13 +261,14 @@ export default function create(context) {
 
 			contentBytes = parseInt(response.headers.get('content-length'), 10);
 
+			const contentAudioKey = parseInt(response.headers.get('audio-streaming-key'), 10) || 0;
 			const reader = response.body.getReader();
 
 			function read() {
 				reader.read().then(({ done, value }) => {
 					if (value) {
 						downloadBytes += value.length;
-						mergeBuffer(SoundHelper.decodeBuffer(value, 0));
+						mergeBuffer(SoundHelper.decodeBuffer(value, contentAudioKey));
 					}
 
 					contentBytes = done ? downloadBytes : Math.max(contentBytes, downloadBytes);
