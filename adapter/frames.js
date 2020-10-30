@@ -239,7 +239,7 @@ export default function create(context) {
 		}
 
 		const controller = window.AbortController ? new window.AbortController() : {};
-		const request = new Request(audioUrl, {
+		const request = new window.Request(audioUrl, {
 			credentials: 'include',
 			method: 'POST', // https://bugs.webkit.org/show_bug.cgi?id=199492
 			signal: controller.signal,
