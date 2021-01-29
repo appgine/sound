@@ -1,11 +1,11 @@
 
 import * as SoundStore from '../store'
-import { dom } from 'appgine/closure'
 import createCanvas from '../lib/createCanvas'
 import renderCanvasArc from '../lib/renderCanvasArc'
 
 import { useEvent } from 'appgine/hooks/event'
 import { bindDispatch } from 'appgine/hooks/channel'
+import { getLink } from 'appgine/utils/dom'
 
 
 export default function create($element, { url, label, sample }) {
@@ -17,7 +17,7 @@ export default function create($element, { url, label, sample }) {
 	handler.then(render);
 
 	useEvent($element, 'click', e => {
-		if (e && dom.getLink(e) && (e.metaKey || e.ctrlKey)) {
+		if (e && getLink(e) && (e.metaKey || e.ctrlKey)) {
 			if (state.isCurrent) {
 				log(label, 'blank');
 				state.control.pause();
