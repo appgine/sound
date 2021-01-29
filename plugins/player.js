@@ -4,6 +4,7 @@ import * as errorhub from 'appgine/errorhub'
 import * as SoundStore from '../store'
 import domDistance, { domDistanceCompare } from '../lib/dom-distance'
 import { findCurrentTrack, findNextSound, findNextTrack, findPrevTrack, formatPlaylistTrack } from '../lib/playlist'
+import { isStreamingSupported } from '../sound'
 export { isFadeSupported } from '../store'
 
 import { useTimeout } from 'appgine/hooks/timer'
@@ -192,8 +193,9 @@ export default function create(enabled, bridge, state={}) {
 
 	useComplete(() => { updateActivePlaylist(); });
 
-	useTargets(['container', 'source', 'playlist'], function($container) {
-		$container.classList.toggle('hidden', enabled===false);
+	useTargets(['container', 'source', 'playlist'], function($container, { data }) {
+		const isContainerEnabled = data && data.onlyStreaming ? isStreamingSupported() : true;
+		$container.classList.toggle('hidden', enabled===false || isContainerEnabled===false);
 	});
 
 	useTargets(['source', 'playlist'], function($btn, target) {

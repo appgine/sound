@@ -1,8 +1,10 @@
 
-import { isSafari } from './lib/browser'
 import withOffset from './adapter/withOffset'
 import createFadeArray from './lib/createFadeArray'
 import createVolumeNode from './lib/createVolumeNode'
+
+import adapterAudio from './adapter/audio'
+import adapterFrames, { canUse as canUseFrames } from './adapter/frames'
 
 import * as timer from 'appgine/hooks/backgroundTimer'
 
@@ -24,6 +26,11 @@ export function onInit(fn) {
 }
 
 
+export function isStreamingSupported() {
+	return isFadeSupported() && canUseFrames();
+}
+
+
 let audioCtx;
 let audioAdapterFactory;
 let audioFactory;
@@ -42,11 +49,11 @@ export function initSound() {
 	}
 
 	if (audioAdapterFactory===undefined) {
-		if (isSafari() && audioCtx) {
-			audioAdapterFactory = withOffset(require('./adapter/frames').default, false);
+		if (audioCtx && canUseFrames()) {
+			audioAdapterFactory = withOffset(adapterFrames, false);
 
 		} else {
-			audioAdapterFactory = withOffset(require('./adapter/audio').default, true);
+			audioAdapterFactory = withOffset(adapterAudio, true);
 		}
 	}
 
