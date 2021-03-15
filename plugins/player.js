@@ -1,5 +1,5 @@
 
-import { uri } from 'appgine/closure'
+import * as uri from 'appgine/src/engine/uri'
 import * as errorhub from 'appgine/errorhub'
 import * as SoundStore from '../store'
 import domDistance, { domDistanceCompare } from '../lib/dom-distance'
