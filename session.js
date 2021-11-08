@@ -105,7 +105,7 @@ export default function create() {
 			audio.title = track.data.name;
 		}
 
-		if (window.MediaMetadata) {
+		if (typeof navigator==='object' && navigator.mediaSession && window.MediaMetadata) {
 			navigator.mediaSession.metadata = new window.MediaMetadata({
 				title: track.data.name,
 				artist: track.data.album.artistname,
